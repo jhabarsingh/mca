@@ -1,6 +1,6 @@
 from math import sqrt, pow
 import Queue
-from mpiLib import MPI
+from threading import Thread
 
 import time
 
@@ -24,8 +24,8 @@ def bruteMin(points, current=float("inf")):
 
 def divideMin(points):
   half = len(sorted(points))/2
-  a = MPI(target=lambda q, arg1: q.put(bruteMin(arg1)), args=(que, points[:half]))
-  b = MPI(target=lambda q, arg1: q.put(bruteMin(arg1)), args=(que, points[half:]))
+  a = Thread(target=lambda q, arg1: q.put(bruteMin(arg1)), args=(que, points[:half]))
+  b = Thread(target=lambda q, arg1: q.put(bruteMin(arg1)), args=(que, points[half:]))
   a.start()
   b.start()
   a.join()
@@ -36,7 +36,6 @@ def divideMin(points):
   minimum = min([a, b])
   nearLine = filter(lambda x: x[0] > half - minimum and x[0] < half + minimum, points)
   return min([bruteMin(nearLine), minimum])
-
 
 
 
